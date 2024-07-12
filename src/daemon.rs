@@ -66,7 +66,7 @@ fn block_from_value(value: Value) -> Result<Block> {
     Ok(deserialize(&block_bytes).chain_err(|| format!("failed to parse block {}", block_hex))?)
 }
 
-fn tx_from_value(value: Value) -> Result<Transaction> {
+pub fn tx_from_value(value: Value) -> Result<Transaction> {
     let tx_hex = value.as_str().chain_err(|| "non-string tx")?;
     let tx_bytes = Vec::from_hex(tx_hex).chain_err(|| "non-hex tx")?;
     Ok(deserialize(&tx_bytes).chain_err(|| format!("failed to parse tx {}", tx_hex))?)
@@ -367,7 +367,7 @@ impl Daemon {
     }
 
     pub fn list_blk_files(&self) -> Result<Vec<PathBuf>> {
-        let path = self.blocks_dir.join("blk*.dat");
+        let path = self.blocks_dir.join("blk03*.dat");
         debug!("listing block files at {:?}", path);
         let mut paths: Vec<PathBuf> = glob::glob(path.to_str().unwrap())
             .chain_err(|| "failed to list blk*.dat files")?
@@ -521,10 +521,14 @@ impl Daemon {
     pub fn gettransaction_raw(
         &self,
         txid: &Txid,
-        blockhash: &BlockHash,
+        blockhash: Option<&BlockHash>,
         verbose: bool,
     ) -> Result<Value> {
         self.request("getrawtransaction", json!([txid, verbose, blockhash]))
+    }
+
+    pub(crate) fn gettxout(&self, txid: &Txid, vout: u32, include_mempool: bool) -> Result<Value> {
+        self.request("gettxout", json!([txid, vout, include_mempool]))
     }
 
     pub fn getmempooltx(&self, txhash: &Txid) -> Result<Transaction> {
@@ -553,7 +557,10 @@ impl Daemon {
     // Missing estimates are logged but do not cause a failure, whatever is available is returned
     #[allow(clippy::float_cmp)]
     pub fn estimatesmartfee_batch(&self, conf_targets: &[u16]) -> Result<HashMap<u16, f64>> {
-        let params_list: Vec<Value> = conf_targets.iter().map(|t| json!([t, "ECONOMICAL"])).collect();
+        let params_list: Vec<Value> = conf_targets
+            .iter()
+            .map(|t| json!([t, "ECONOMICAL"]))
+            .collect();
 
         Ok(self
             .requests("estimatesmartfee", &params_list)?

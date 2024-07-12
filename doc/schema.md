@@ -15,6 +15,20 @@ NOTE: in order to construct the history rows for spending inputs in phase #2, we
 
 After the indexing is completed, both funding and spending are indexed as independent rows under `H{scripthash}`, so that they can be queried in-order in one go.
 
+### `tweaks`
+
+Each block results in the following new rows:
+
+ * `"K{blockhash}" → "{tweaks}"` (list of txids included in the block)
+
+Each transaction results in the following new rows:
+
+ * `"W{txid}" → "{tweak}{funding-txid:vout0}{funding-scripthash0}...{funding-txid:voutN}{funding-scripthashN}"` (txid -> tweak, and list of vout:amount:scripthash for each valid sp output)
+
+When the indexer is synced up to the tip of the chain, the hash of the tip is saved as following:
+
+ * `"k" →  "{blockhash}"`
+
 ### `txstore`
 
 Each block results in the following new rows:
