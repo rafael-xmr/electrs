@@ -173,9 +173,21 @@ checksum = "cf9ff0bbfd639f15c74af777d81383cf53efb7c93613f6cab67c6c11e05bbf8b"
 
 [[package]]
 name = "bech32"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d86b93f97252c47b41663388e6d155714a9d0c398b99f1005cbc5f978b29f445"
+
+[[package]]
+name = "bech32"
 version = "0.10.0-beta"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "98f7eed2b2781a6f0b5c903471d48e15f56fb4e1165df8a9a2337fd1a59d45ea"
+
+[[package]]
+name = "bimap"
+version = "0.6.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "230c5f1ca6a325a32553f8640d31ac9b49f2411e901e427570154868b46da4f7"
 
 [[package]]
 name = "bincode"
@@ -669,6 +681,7 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "signal-hook",
+ "silentpayments",
  "socket2",
  "stderrlog",
  "sysconf",
@@ -2034,6 +2047,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d8229b473baa5980ac72ef434c4415e70c4b5e71b423043adb4ba059f89c99a1"
 dependencies = [
  "libc",
+]
+
+[[package]]
+name = "silentpayments"
+version = "0.3.0"
+source = "git+https://github.com/cygnet3/rust-silentpayments?branch=master#48e2730dcb7a1ff9d74bbde569df3649416eb459"
+dependencies = [
+ "bech32 0.9.1",
+ "bimap",
+ "bitcoin_hashes 0.13.0",
+ "hex",
+ "secp256k1 0.28.2",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
