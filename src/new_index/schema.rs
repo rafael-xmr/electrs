@@ -1292,6 +1292,7 @@ fn tweak_transaction(
 ) {
     let txid = &tx.txid();
     let mut output_pubkeys: Vec<VoutData> = Vec::with_capacity(tx.output.len());
+    let mut spent_pubkeys: Vec<&Script> = Vec::with_capacity(tx.output.len());
 
     for (txo_index, txo) in tx.output.iter().enumerate() {
         if is_spendable(txo) {
@@ -1300,20 +1301,23 @@ fn tweak_transaction(
                 && amount >= iconfig.sp_min_dust.unwrap_or(1_000) as u64
             {
                 let unspent_response = daemon.gettxout(txid, txo_index as u32, false).ok().unwrap();
-                let is_unspent = !unspent_response.is_null();
+                let is_spent = unspent_response.is_null();
 
-                if is_unspent {
-                    output_pubkeys.push(VoutData {
-                        vout: txo_index,
-                        amount,
-                        script_pubkey: txo.script_pubkey.clone(),
-                    });
+                if is_spent {
+                    spent_pubkeys.push(&txo.script_pubkey);
                 }
+
+                output_pubkeys.push(VoutData {
+                    vout: txo_index,
+                    amount,
+                    script_pubkey: txo.script_pubkey.clone(),
+                });
             }
         }
     }
 
-    if output_pubkeys.is_empty() {
+    let all_spent = output_pubkeys.len() == spent_pubkeys.len();
+    if output_pubkeys.is_empty() || all_spent {
         return;
     }
 
